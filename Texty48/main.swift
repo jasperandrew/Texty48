@@ -7,11 +7,11 @@
 //
 
 import Foundation
-let DBG = true
+let DBG = false
 
 var board = [[1,2,0,0],
              [0,2,0,0],
-             [0,0,0,0],
+             [0,0,2,0],
              [0,0,0,0]]
 
 var sym:[Int:String] = [0:" ", 1:"1", 2:"2", 4:"4", 8:"8",
@@ -30,63 +30,116 @@ func printTheBoard() {
 	print("-----------------")
 }
 
-func canMove(r:Int, c:Int, dir:String)->Bool {
-	switch dir {
+func tileCanMove(row:Int, col:Int, direc:String)->Int {
+	switch direc {
 	case "up":
-		if r == 0 {return false}
-		if board[r-1][c] == 0 {return true}
-		return false
+		if row == 0 {return 0}
+		if board[row-1][col] == 0 {return 1}
+		if board[row-1][col] == board[row][col] {return 2}
+		return 0
 	case "dn":
-		if r == 3 {return false}
-		if board[r+1][c] == 0 {return true}
-		return false
+		if row == 3 {return 0}
+		if board[row+1][col] == 0 {return 1}
+		if board[row+1][col] == board[row][col] {return 2}
+		return 0
 	case "lt":
-		if c == 0 {return false}
-		if board[r][c-1] == 0 {return true}
-		return false
+		if col == 0 {return 0}
+		if board[row][col-1] == 0 {return 1}
+		if board[row][col-1] == board[row][col] {return 2}
+		return 0
 	case "rt":
-		if c == 3 {return false}
-		if board[r][c+1] == 0 {return true}
-		return false
+		if col == 3 {return 0}
+		if board[row][col+1] == 0 {return 1}
+		if board[row][col+1] == board[row][col] {return 2}
+		return 0
 	default:
 		exit(1)
 	}
 }
 
-func push(dir:String) {
+func moveTile(row:Int, col:Int, direc:String, val:Int) {
+	switch direc {
+	case "up":
+		board[row-1][col] = val*board[row][col]; break
+	case "dn":
+		board[row+1][col] = val*board[row][col]; break
+	case "lt":
+		board[row][col-1] = val*board[row][col]; break
+	case "rt":
+		board[row][col+1] = val*board[row][col]; break
+	default:
+		exit(1)
+	}
+	board[row][col] = 0
+}
+
+func push(direc:String) {
+	let uplt = ["up","lt"].contains(direc) ? true : false
 	var cont = true
 	while cont {
 		cont = false
-		for i in 0..<4 {
-			for j in 0..<4 {
-				if board[i][j] != 0 && canMove(r: i, c: j, dir: dir) {
-					if DBG { print("pushing (\(i),\(j)) \(dir)") }
-					cont = true
-					switch dir {
-					case "up":
-						board[i-1][j] = board[i][j]; break
-					case "dn":
-						board[i+1][j] = board[i][j]; break
-					case "lt":
-						board[i][j-1] = board[i][j]; break
-					case "rt":
-						board[i][j+1] = board[i][j]; break
-					default:
-						exit(1)
+		
+		var i = uplt ? 0 : 3
+		while i != -1 && i != 4 {
+			
+			var j = uplt ? 0 : 3
+			while j != -1 && j != 4 {
+				
+				if board[i][j] != 0 {
+					let canmove = tileCanMove(row: i, col: j, direc: direc)
+					if canmove == 1 {
+						cont = true
+						moveTile(row: i, col: j, direc: direc, val: 1)
 					}
-					board[i][j] = 0
+					if canmove == 2 {
+						cont = true
+						moveTile(row: i, col: j, direc: direc, val: 2)
+					}
 				}
+				
+				if uplt {j += 1} else {j -= 1}
 			}
+			
+			if uplt {i += 1} else {i -= 1}
 		}
 	}
 }
 
+func emptySquares() -> Int {
+	return 0
+}
+
+board = [[1,2,4,0],
+		 [1,2,4,0],
+		 [1,2,4,0],
+		 [0,0,0,0]]
 printTheBoard()
-push(dir: "rt")
+push(direc: "up")
 printTheBoard()
-push(dir: "dn")
+print()
+
+board = [[1,1,1,0],
+         [2,2,2,0],
+         [4,4,4,0],
+         [0,0,0,0]]
 printTheBoard()
-push(dir: "lt")
+push(direc: "lt")
 printTheBoard()
-push(dir: "up")
+print()
+
+board = [[1,2,4,0],
+         [1,2,4,0],
+         [1,2,4,0],
+         [0,0,0,0]]
+printTheBoard()
+push(direc: "dn")
+printTheBoard()
+print()
+
+board = [[1,1,1,0],
+         [2,2,2,0],
+         [4,4,4,0],
+         [0,0,0,0]]
+printTheBoard()
+push(direc: "rt")
 printTheBoard()
