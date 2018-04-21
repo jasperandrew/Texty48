@@ -239,8 +239,6 @@ func play() {
 		}
 		printTheBoard()
 	}
-	
-	
 }
 
 play()
